@@ -127,6 +127,8 @@ var defaults = {
     loop: false,
     loopAdditionalSlides: 0,
     loopedSlides: null,
+    // slideTo() - normalize index
+    normalizeOnSlideClick: true,
     // Control
     control: undefined,
     controlInverse: false,
@@ -1286,7 +1288,7 @@ function findElementInEvent(e, selector) {
     // Allows passing in a custom function to retrieve a (normalized)
     // target node from event.
     var el = $(typeof s.params.getEventTarget === 'function' ? s.params.getEventTarget(e) : e.target);
-    
+
     if (!el.is(selector)) {
         if (typeof selector === 'string') {
             el = el.parents(selector);
@@ -1356,7 +1358,7 @@ s.updateClickedSlide = function (e) {
             }
         }
         else {
-            s.slideTo(slideToIndex);
+            s.slideTo(slideToIndex, undefined, undefined, undefined, false);
         }
     }
 };
@@ -1848,7 +1850,8 @@ s.onTouchEnd = function (e) {
 s._slideTo = function (slideIndex, speed) {
     return s.slideTo(slideIndex, speed, true, true);
 };
-s.slideTo = function (slideIndex, speed, runCallbacks, internal) {
+s.slideTo = function (slideIndex, speed, runCallbacks, internal, normalize) {
+    if (typeof normalize === 'undefined') normalize = true;
     if (typeof runCallbacks === 'undefined') runCallbacks = true;
     if (typeof slideIndex === 'undefined') slideIndex = 0;
     if (slideIndex < 0) slideIndex = 0;
@@ -1869,9 +1872,11 @@ s.slideTo = function (slideIndex, speed, runCallbacks, internal) {
     s.updateProgress(translate);
 
     // Normalize slideIndex
-    for (var i = 0; i < s.slidesGrid.length; i++) {
-        if (- Math.floor(translate * 100) >= Math.floor(s.slidesGrid[i] * 100)) {
-            slideIndex = i;
+     if ( normalize || s.params.normalizeOnSlideClick ) {
+        for (var i = 0; i < s.slidesGrid.length; i++) {
+            if (- Math.floor(translate * 100) >= Math.floor(s.slidesGrid[i] * 100)) {
+                slideIndex = i;
+            }
         }
     }
 
